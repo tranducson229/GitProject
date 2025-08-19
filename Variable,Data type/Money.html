@@ -10,13 +10,14 @@
             justify-content: space-around;
         }
     </style>
+   
 </head>
 <body>
     <div class="container">
         <div id="money">
-            <p>Ammount:</p>
+            <p>Amount:</p>
             <br>
-            <input type="text" name="" id="Ammount" placeholder="Nhập số tiền cần chuyển">
+            <input type="text" name="" id="Amount" placeholder="Nhập số tiền cần chuyển">
         </div>
         <div id="country">
             <p>From Currency:</p>
@@ -40,18 +41,18 @@
         <div id="Result"></div>
     <script>
         function ChangeMoney(){
-            let Ammount = document.getElementById("Ammount").value;
+            let Amount = document.getElementById("Amount").value;
             let From = document.getElementById("From").value;
             let To = document.getElementById("To").value;
             let Result;
             if (From === "VND" && To === "USD") {
-                Result = "Result: " + (Ammount / 23000).toFixed(2) + " USD";
+                Result = "Result: " + (Amount / 23000).toFixed(2) + " USD"; /*toFixed():Làm tròn số và hiển thị đúng số lượng chữ số thập phân chỉ định. trả về chuỗi */
             } 
             else if (From === "USD" && To === "VND") {
-                Result = "Result: " + (Ammount * 23000).toLocaleString() + " VND";
+                Result = "Result: " + (Amount * 23000).toLocaleString() + " VND"; /*toLocaleString():Format số theo quy tắc phân tách hàng nghìn (và các quy tắc khác tùy theo locale/ngôn ngữ).*/
             } 
             else {
-                Result = "Result: " + Ammount + " " + To;
+                Result = "Result: " + Amount + " " + To;
             }
 
             document.getElementById("Result").innerHTML = Result;
