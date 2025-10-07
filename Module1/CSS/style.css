@@ -1,0 +1,247 @@
+
+        /* Biến CSS để dễ dàng thay đổi màu sắc */
+        :root {
+            --primary-color: #007bff; /* Xanh dương nổi bật */
+            --primary-hover: #0056b3;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa; /* Nền sáng */
+            --card-background: #ffffff;
+            --text-color: #343a40;
+            --border-color: #ced4da;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px; /* Tăng kích thước tối đa để bố cục thoáng hơn */
+            margin: 40px auto;
+            background-color: var(--card-background);
+            border-radius: 16px;
+            box-shadow: var(--shadow-medium);
+            padding: 30px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Tiêu đề */
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: var(--text-color);
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        /* Form Controls */
+        label {
+            display: block;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 15px;
+            margin-top: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--background-color);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box; /* Quan trọng để padding không làm tăng chiều rộng */
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            outline: none;
+            background-color: var(--card-background);
+        }
+
+        /* Nút */
+        button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+            width: 100%; /* Đặt nút chiếm hết chiều rộng */
+            box-sizing: border-box;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Định dạng cho nút tìm kiếm riêng */
+        #searchBtn {
+            width: auto;
+            margin-left: 10px;
+            padding: 12px 20px;
+        }
+
+        /* Thanh phân cách */
+        hr {
+            border: none;
+            border-top: 1px dashed #e9ecef;
+            margin: 30px 0;
+        }
+
+        /* Danh sách sinh viên */
+        #studentList ul, #searchResults ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #studentList li, #searchResults li {
+            background: #e9f5ff; /* Màu nền nhẹ cho danh sách */
+            margin-bottom: 10px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            color: var(--text-color);
+            border-left: 5px solid var(--primary-color);
+            font-size: 0.95rem;
+            box-shadow: var(--shadow-light);
+            transition: background 0.2s;
+        }
+
+        #studentList li:hover, #searchResults li:hover {
+            background: #d4eafc;
+        }
+        
+        /* Layout cho tìm kiếm */
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-container input {
+            flex-grow: 1;
+            margin-top: 0;
+        }
+
+        /* Kết quả tìm kiếm */
+        #searchResults h4 {
+            color: var(--primary-color);
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        #searchResults p {
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        /* Thêm CSS này */
+.score-inputs {
+    display: flex; /* Sử dụng Flexbox để xếp các ô nhập điểm ngang hàng */
+    gap: 15px; /* Khoảng cách giữa các ô điểm */
+    margin-bottom: 20px;
+    flex-wrap: wrap; /* Cho phép xuống dòng trên màn hình nhỏ */
+}
+
+.score-inputs label {
+    flex-grow: 1; /* Cho mỗi label (chứa input) chiếm không gian bằng nhau */
+    flex-basis: 0; /* Giúp các phần tử chia đều không gian */
+    margin-bottom: 0; /* Loại bỏ margin-bottom mặc định cho label trong form */
+    min-width: 120px; /* Đảm bảo ô nhập không quá nhỏ trên màn hình lớn */
+}
+
+.score-inputs label span {
+    display: block; /* Đảm bảo tiêu đề môn học nằm trên ô nhập */
+    margin-bottom: 5px;
+    font-weight: 400; /* Làm nhẹ chữ "Điểm Toán/Lý/Hóa" */
+    color: var(--secondary-color); /* Màu chữ xám nhẹ */
+}
+/* Điều chỉnh input type number cho đẹp hơn */
+.score-inputs input[type="number"] {
+    width: 100%; /* Đảm bảo input chiếm hết chiều rộng của label */
+    text-align: center; /* Căn giữa điểm số */
+}
+
+/* Điều chỉnh responsive cho màn hình nhỏ hơn 600px */
+@media (max-width: 600px) {
+    .score-inputs {
+        flex-direction: column; /* Xếp dọc các ô nhập điểm */
+        gap: 10px;
+    }
+    .score-inputs label {
+        min-width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px 10px;
+                padding: 20px;
+                border-radius: 12px;
+            }
+            button {
+                padding: 10px 20px;
+            }
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #searchBtn {
+                width: 100%;
+                margin: 5px 0 0 0;
+            }
+        }
+/* CSS cho phần chuyển sang quản lý lớp (link) */
+.extra-interface a {
+    display: inline-block; /* Quan trọng: Biến link thành khối để áp dụng padding */
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #ffc107; /* Màu vàng cảnh báo */
+    color: #343a40;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.4);
+}
+
+.extra-interface a:hover {
+    background-color: #e0a800; /* Màu vàng đậm hơn khi hover */
+    transform: translateY(-1px);
+}
+
+/* Đảm bảo link không bị chiếm hết chiều rộng như các nút button khác */
+#classStatsResult + div { /* Chọn div chứa link quản lý lớp */
+    display: block;
+    margin-bottom: 20px;
+}

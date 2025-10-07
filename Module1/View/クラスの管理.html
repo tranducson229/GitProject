@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý lớp học</title>
+    <link rel="stylesheet" href="/Module1/CSS/クラス.css">
+</head>
+<body>
+    <div class="container">
+        <h2>📚 Quản lý lớp học</h2>
+        <button id="addClassBtn" class="details-btn">➕ Thêm lớp</button>
+        
+        <div id="classForm" style="display: none;">
+            <h3 id="formTitle">Thêm lớp mới</h3>
+            <label>Tên lớp: <input type="text" id="className"></label><br><br>
+            <label>Giáo viên chủ nhiệm: <input type="text" id="teacherName"></label><br><br>
+            <button id="saveClassBtn" class="details-btn">Lưu</button>
+            <button id="cancelBtn" class="delete-btn">Hủy</button>
+        </div>
+        
+        <h3>Danh sách các lớp</h3>
+        <div id="classList"></div>
+
+        <hr>
+        <div id="classDetails">
+            <h3>Chi tiết Lớp và Sinh viên</h3>
+            <p>Chọn nút "Chi tiết" bên cạnh mỗi lớp để xem danh sách sinh viên.</p>
+        </div>
+    </div>
+    
+    <script>
+    // --- KHAI BÁO HÀM LOCAL STORAGE VÀ DỮ LIỆU ---
+
+    function saveToLocalStorage(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage(key) {
+        const storedData = localStorage.getItem(key);
+        return storedData ? JSON.parse(storedData) : [];
+    }
+    
+    // Tải dữ liệu từ Local Storage
+    let classes = loadFromLocalStorage('classes');
+    let students = loadFromLocalStorage('students');
+    
+    // Nếu chưa có lớp nào, khởi tạo lớp mặc định (Tùy chọn)
+    if (classes.length === 0) {
+        classes = [
+            { id: 'ctk45', name: 'CTK45', teacher: 'ThS. Nguyễn Văn A' },
+            { id: 'ctk44', name: 'CTK44', teacher: 'PGS. Trần Thị B' },
+        ];
+        saveToLocalStorage('classes', classes);
+    }
+    
+    let editIndex = null;
+    
+    // DOM Elements
+    const addClassBtn = document.getElementById('addClassBtn');
+    const classForm = document.getElementById('classForm');
+    const saveClassBtn = document.getElementById('saveClassBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const classNameInput = document.getElementById('className');
+    const teacherNameInput = document.getElementById('teacherName');
+    const classList = document.getElementById('classList');
+    const classDetails = document.getElementById('classDetails');
+    const formTitle = document.getElementById('formTitle');
+
+
+    // Hàm tiện ích tính điểm trung bình
+    function calculateOverallScore(math, physics, chemistry) {
+        const sum = parseFloat(math || 0) + parseFloat(physics || 0) + parseFloat(chemistry || 0);
+        return (sum / 3).toFixed(2); 
+    }
+
+    // --- LOGIC CRUD LỚP ---
+
+    function renderClasses() {
+        classList.innerHTML = '';
+        classes.forEach((cls, idx) => {
+            // Đếm số SV dựa trên tên lớp (cls.name)
+            const studentCount = students.filter(s => s.className === cls.name).length; 
+            const div = document.createElement('div');
+            div.className = 'class-item';
+            div.innerHTML = `
+                <div>
+                    <strong>${cls.name}</strong> 
+                    <span style="font-size: 0.9em; color: #6c757d;">(${studentCount} Sinh viên)</span>
+                    <br>Giáo viên: ${cls.teacher}
+                </div>
+                <div class="actions">
+                    <button class="details-btn" onclick="showDetails('${cls.name}')">Chi tiết SV</button>
+                    <button class="edit-btn" onclick="editClass(${idx})">Sửa</button>
+                    <button class="delete-btn" onclick="deleteClass(${idx})">Xóa</button>
+                </div>
+            `;
+            classList.appendChild(div);
+        });
+    }
+
+    function resetForm() {
+        classNameInput.value = '';
+        teacherNameInput.value = '';
+        editIndex = null;
+        formTitle.textContent = 'Thêm lớp mới';
+    }
+
+    addClassBtn.onclick = () => {
+        classForm.style.display = 'block';
+        resetForm();
+    };
+
+    cancelBtn.onclick = () => {
+        classForm.style.display = 'none';
+        resetForm();
+    };
+
+    saveClassBtn.onclick = () => {
+        const name = classNameInput.value.trim();
+        const teacher = teacherNameInput.value.trim();
+        if (!name || !teacher) {
+            alert('Vui lòng nhập đầy đủ thông tin.');
+            return;
+        }
+        
+        let oldName = null;
+
+        if (editIndex === null) {
+            // Thêm lớp mới
+            classes.push({ name, teacher });
+        } else {
+            // Sửa lớp
+            oldName = classes[editIndex].name;
+            classes[editIndex] = { name, teacher };
+        }
+        
+        // Cập nhật mảng students nếu tên lớp thay đổi
+        if (oldName && oldName !== name) {
+            students.forEach(s => {
+                if (s.className === oldName) {
+                    s.className = name;
+                }
+            });
+            // LƯU LẠI MẢNG STUDENTS ĐÃ SỬA
+            saveToLocalStorage('students', students); 
+        }
+
+        // LƯU LẠI MẢNG CLASSES
+        saveToLocalStorage('classes', classes);
+
+        classForm.style.display = 'none';
+        resetForm();
+        renderClasses();
+    };
+    window.editStudent = (idx) => {
+        const student = students[idx];
+        const newMath = prompt('Điểm Toán:', student.math);
+        if (newMath !== null && !isNaN(newMath) && newMath.trim() !== '') {
+            student.math = parseFloat(newMath).toFixed(2);
+        }
+       
+        const newPhysics = prompt('Điểm Lý:', student.physics);
+        if (newPhysics !== null && !isNaN(newPhysics) && newPhysics.trim() !== '') {
+            student.physics = parseFloat(newPhysics).toFixed(2);
+        }
+        const newChemistry = prompt('Điểm Hóa:', student.chemistry);
+        if (newChemistry !== null && !isNaN(newChemistry) && newChemistry.trim() !== '') {
+            student.chemistry = parseFloat(newChemistry).toFixed(2);
+        }
+        const newName = prompt('Tên sinh viên:', student.name);
+        if (newName !== null && newName.trim() !== '') {
+            student.name = newName.trim();
+            // LƯU LẠI MẢNG STUDENTS
+            saveToLocalStorage('students', students);
+            renderClasses();
+            showDetails(student.className); // Cập nhật lại chi tiết lớp
+        }
+    };
+    window.editClass = (idx) => {
+        editIndex = idx;
+        classForm.style.display = 'block';
+        classNameInput.value = classes[idx].name;
+        teacherNameInput.value = classes[idx].teacher;
+        formTitle.textContent = 'Sửa lớp';
+    };
+
+    window.deleteClass = (idx) => {
+        const clsName = classes[idx].name;
+        const svCount = students.filter(s => s.className === clsName).length;
+        
+        if (svCount > 0) {
+             if (!confirm(`Lớp ${clsName} đang có ${svCount} sinh viên. Xóa lớp sẽ KHÔNG xóa sinh viên nhưng sẽ gán họ vào lớp 'Không xác định'. Bạn có chắc muốn xóa?`)) {
+                 return;
+             }
+             // Cập nhật sinh viên sang lớp 'Không xác định'
+             students.forEach(s => {
+                 if (s.className === clsName) {
+                     s.className = 'Không xác định';
+                 }
+             });
+             // LƯU LẠI MẢNG STUDENTS ĐÃ SỬA
+             saveToLocalStorage('students', students); 
+        } else {
+            if (!confirm(`Bạn có chắc muốn xóa lớp ${clsName}?`)) return;
+        }
+
+        classes.splice(idx, 1);
+        // LƯU LẠI MẢNG CLASSES
+        saveToLocalStorage('classes', classes);
+        
+        renderClasses();
+        classDetails.innerHTML = '';
+    };
+    //Hàm xóa sinh viên
+    window.deleteStudent = (idx, className) => {
+    const studentName = students[idx].name;
+    if (confirm(`Bạn có chắc muốn xóa sinh viên ${studentName} khỏi danh sách? Hành động này không thể hoàn tác.`)) {
+        // Xóa sinh viên khỏi mảng
+        students.splice(idx, 1);
+        
+        // Cập nhật Local Storage
+        saveToLocalStorage('students', students);
+        
+        // Cập nhật hiển thị
+        renderClasses(); // Cập nhật số lượng SV trong danh sách lớp
+        showDetails(className); // Cập nhật lại chi tiết lớp
+    }
+};
+
+    // --- LOGIC HIỂN THỊ CHI TIẾT SINH VIÊN ---
+
+  window.showDetails = (className) => {
+    const clsInfo = classes.find(c => c.name === className) || { name: className, teacher: 'N/A' };
+    const classStudents = students.filter(s => s.className === className); 
+    
+    // Tính điểm trung bình lớp (Giữ nguyên)
+    let avgScore = 0;
+    if (classStudents.length > 0) {
+        const totalScore = classStudents.reduce((sum, s) => sum + parseFloat(calculateOverallScore(s.math, s.physics, s.chemistry)), 0);
+        avgScore = (totalScore / classStudents.length).toFixed(2);
+    }
+
+    let html = `
+        <h3>Chi tiết lớp: ${clsInfo.name}</h3>
+        <p><strong>Giáo viên chủ nhiệm:</strong> ${clsInfo.teacher}</p>
+        <p><strong>Điểm TB Lớp:</strong> <span style="color: #28a745; font-weight: bold;">${avgScore > 0 ? avgScore : 'N/A'}</span></p>
+        <h4>Danh sách Sinh viên (${classStudents.length} người):</h4>
+    `;
+
+    if (classStudents.length === 0) {
+        html += '<p style="color: #6c757d;">Chưa có sinh viên nào trong lớp này.</p>';
+    } else {
+        classStudents.sort((a, b) => parseFloat(calculateOverallScore(b.math, b.physics, b.chemistry)) - parseFloat(calculateOverallScore(a.math, a.physics, a.chemistry)));
+
+        const ul = classStudents.map(s => {
+            const score = calculateOverallScore(s.math, s.physics, s.chemistry);
+            
+            // Tìm index của sinh viên trong mảng students GỐC để truyền vào editStudent/deleteStudent
+            // Cần tìm bằng nhiều trường để đảm bảo độ chính xác
+            const studentIndex = students.findIndex(originalS => 
+                originalS.name === s.name && 
+                originalS.className === s.className && 
+                originalS.math === s.math
+            );
+
+            return `
+                <li class="student-item-details">
+                    <div>
+                        <strong>${s.name}</strong>: 
+                        <span class="scores-text">
+                            Toán ${s.math}, Lý ${s.physics}, Hóa ${s.chemistry}. 
+                            ĐTB: <strong>${score}</strong>
+                        </span>
+                    </div>
+                    <div>
+                        <button class="edit-btn" onclick="editStudent(${studentIndex})">Sửa</button>
+                        <button class="delete-btn" onclick="deleteStudent(${studentIndex}, '${className}')">Xóa</button>
+                    </div>
+                </li>
+            `;
+        }).join('');
+        html += `<ul id="studentsList">${ul}</ul>`;
+    }
+
+    classDetails.innerHTML = html;
+};
+
+// Khởi tạo khi tải trang (Giữ nguyên)
+document.addEventListener('DOMContentLoaded', renderClasses);
+</script>
+</body>
+</html>
