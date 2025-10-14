@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra cặp số thân thiết</title>
+</head>
+<body>
+    <script>
+        function sumOfProperDivisors(num) {
+            if (num <= 1) {
+                return 0;
+            }
+            let sum = 1; //1 luôn là ước
+            for (let i = 2; i <= Math.sqrt(num); i++) {
+                if (num % i === 0) {
+                    sum += i;
+                    if (i * i !== num) {
+                        sum += num / i;
+                    }
+                }
+            }
+            return sum;
+        }
+
+        /**
+         * Hàm kiểm tra xem hai số có phải là một cặp số thân thiết hay không.
+         * @param {number} num1 Số nguyên dương thứ nhất.
+         * @param {number} num2 Số nguyên dương thứ hai.
+         * @returns {boolean} Trả về true nếu là cặp số thân thiết, ngược lại trả về false.
+         */
+        function areAmicable(num1, num2) {
+            // Cặp số thân thiết phải là hai số khác nhau
+            if (num1 === num2) {
+                return false;
+            }
+            return sumOfProperDivisors(num1) === num2 && sumOfProperDivisors(num2) === num1;
+        }
+
+        // Nhập hai số từ người dùng
+        let number1, number2;
+        do {
+            number1 = parseInt(prompt("Nhập số nguyên dương thứ nhất:"));
+        } while (isNaN(number1) || number1 <= 0);
+
+        do {
+            number2 = parseInt(prompt("Nhập số nguyên dương thứ hai:"));
+        } while (isNaN(number2) || number2 <= 0);
+
+        document.write(`Kiểm tra cặp số: ${number1} và ${number2}<br>`);
+        if (areAmicable(number1, number2)) {
+            document.write(`=> ${number1} và ${number2} là một cặp số thân thiết.`);
+        } else {
+            document.write(`=> ${number1} và ${number2} không phải là một cặp số thân thiết.`);
+        }
+
+       
+    </script>
+</body>
+</html>

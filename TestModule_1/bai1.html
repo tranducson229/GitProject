@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let n;
+        do {
+            n = parseInt(prompt("Nhập số phần tử của mảng (n <= 50):"));
+        } while (isNaN(n) || n <= 0 || n > 50);
+        //Khai mảng
+        const arr = [];
+        for (let i = 0; i < n; i++) {
+            let element;
+            do {
+                element = parseInt(prompt(`Nhập phần tử thứ ${i}:`));
+            } while (isNaN(element));
+            arr.push(element);
+        }
+
+        let sum = 0;
+        let count = 0;
+        let oddElementsAtEvenIndices = []; //Lưu các phần tử lẻ ở vị trí chẵn
+
+        // Duyệt mảng để tính tổng và lưu phần tử lẻ ở vị trí chẵn
+        for (let i = 0; i < arr.length; i++) {
+            // Kiểm tra vị trí chẵn (chỉ số i chẵn) và giá trị lẻ
+            if (i % 2 === 0 && arr[i] % 2 !== 0) {
+                sum += arr[i];
+                count++;
+                oddElementsAtEvenIndices.push(arr[i]);
+            }
+        }
+
+        // Hiển thị mảng đã nhập
+        document.write(`Mảng đã nhập: [${arr.join(', ')}]<br>`);
+
+        // Hiển thị các phần tử lẻ ở vị trí chẵn
+        if (oddElementsAtEvenIndices.length > 0) {
+            document.write(`Các phần tử lẻ ở vị trí chẵn: [${oddElementsAtEvenIndices.join(', ')}]<br>`);
+            const average = sum / count;
+            document.write(`Trung bình cộng các số lẻ ở vị trí chẵn là: ${average}`);
+        } else {
+            document.write("Không có số lẻ nào ở vị trí chẵn.");
+        }
+    </script>
+</body>
+</html>

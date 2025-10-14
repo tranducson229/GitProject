@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Sách</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        button { padding: 8px 12px; font-size: 14px; cursor: pointer; border: none; border-radius: 4px; transition: background-color 0.3s; margin-right: 5px; }
+        #addBookBtn { background-color: #28a745; color: white; margin-bottom: 15px; }
+        #addBookBtn:hover { background-color: #218838; }
+        .borrow-btn { background-color: #ffc107; color: #333; }
+        .borrow-btn:hover { background-color: #e0a800; }
+        .return-btn { background-color: #17a2b8; color: white; }
+        .return-btn:hover { background-color: #138496; }
+        .status-available { color: green; font-weight: bold; }
+        .status-unavailable { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>📚 Quản lý Thư viện Sách</h1>
+    <button id="addBookBtn">Thêm sách mới</button>
+    <hr>
+
+    <table id="bookTable">
+        <thead>
+            <tr>
+                <th>Mã số sách</th>
+                <th>Tên sách</th>
+                <th>Năm xuất bản</th>
+                <th>Số quyển</th>
+                <th>Tình trạng</th>
+                <th>Thao tác</th> 
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        // Định nghĩa lớp
+        class Book {
+            constructor(maSo, ten, namXB, soQuyen) {
+                this.maSo = maSo;
+                this.ten = ten;
+                this.namXB = namXB;
+                this.soQuyen = soQuyen;
+                this.tinhTrang = this.soQuyen > 0;
+                // Thuộc tính mới lưu trữ số lượng ban đầu/tối đa
+                this.maxQuyen = soQuyen; 
+            }
+            
+            // Phương thức mượn sách (giảm 1)
+            borrow() {
+                if (this.soQuyen > 0 ) {
+                    this.soQuyen--;
+                    this.tinhTrang = this.soQuyen > 0;
+                    return true;
+                }
+                return false;
+            }
+            
+            // Phương thức trả sách (tăng 1, đã được kiểm tra giới hạn trong handleReturn)
+            returnBook() {
+                this.soQuyen++;
+                this.tinhTrang = true;
+                return true;
+            }
+        }
+
+        // Dữ liệu mẫu
+        const danhSachSach = [
+            new Book("10001", "Lập trình JavaScript", 2020, 5),
+            new Book("20002", "Học Python cơ bản", 2019, 3),
+            new Book("30003", "Cấu trúc dữ liệu và giải thuật", 2018, 0),
+            new Book("40004", "Phát triển Web với React", 2021, 2),
+            new Book("50005", "Cơ sở dữ liệu MySQL", 2017, 4)
+        ];
+
+        // --- HÀM TIỆN ÍCH / VALIDATE ---
+
+        function validateMaSo(maSo) {
+            const regex = /^[1-5][0-9]{4}$/;
+            return regex.test(maSo);
+        }
+
+        function validateNamXB(nam) {
+            const num = parseInt(nam);
+            const currentYear = new Date().getFullYear();
+            return !isNaN(num) && num.toString().length === 4 && num <= currentYear;
+        }
+        
+        function findBookByMaSo(maSo) {
+            return danhSachSach.find(sach => sach.maSo === maSo);
+        }
+
+        // --- CÁC HÀM XỬ LÝ CHỨC NĂNG ---
+
+        function renderBookList() {
+            const tableBody = document.querySelector("#bookTable tbody");
+            tableBody.innerHTML = "";
+
+            danhSachSach.forEach(sach => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = sach.maSo;
+                row.insertCell(1).textContent = sach.ten;
+                row.insertCell(2).textContent = sach.namXB;
+                row.insertCell(3).textContent = sach.soQuyen;
+                
+                const tinhTrangCell = row.insertCell(4);
+                tinhTrangCell.textContent = sach.tinhTrang ? "Còn sách" : "Hết sách";
+                tinhTrangCell.className = sach.tinhTrang ? "status-available" : "status-unavailable";
+
+                // Thêm các nút Thao tác
+                const actionsCell = row.insertCell(5);
+
+                const borrowBtn = document.createElement('button');
+                borrowBtn.textContent = 'Mượn';
+                borrowBtn.className = 'borrow-btn';
+                borrowBtn.onclick = () => handleBorrow(sach.maSo); 
+                actionsCell.appendChild(borrowBtn);
+
+                const returnBtn = document.createElement('button');
+                returnBtn.textContent = 'Trả';
+                returnBtn.className = 'return-btn';
+                returnBtn.onclick = () => handleReturn(sach.maSo);
+                actionsCell.appendChild(returnBtn);
+            });
+        }
+
+        function addBook() {
+            let maSo, ten, namXB, soQuyen;
+
+            // 1. Nhập và validate Mã số
+            do {
+                maSo = prompt("Nhập mã số sách (5 ký tự, bắt đầu bằng 1-5):");
+                if (maSo === null) return; 
+
+                if (!validateMaSo(maSo)) {
+                    alert("Mã số sách không hợp lệ (VD: 1xxxx). Vui lòng nhập lại.");
+                } else if (findBookByMaSo(maSo)) {
+                    alert("Mã số sách đã tồn tại. Vui lòng nhập lại.");
+                    maSo = null;
+                }
+            } while (!validateMaSo(maSo) || maSo === null || findBookByMaSo(maSo));
+
+            // 2. Nhập và validate Tên sách
+            do {
+                ten = prompt("Nhập tên sách:");
+                if (ten === null) return;
+                if (!ten.trim()) {
+                    alert("Tên sách không được để trống. Vui lòng nhập lại.");
+                }
+            } while (!ten.trim());
+
+            // 3. Nhập và validate Năm xuất bản
+            do {
+                namXB = prompt("Nhập năm xuất bản (4 chữ số):");
+                if (namXB === null) return;
+                if (!validateNamXB(namXB)) {
+                    alert(`Năm xuất bản không hợp lệ (4 chữ số, không lớn hơn ${new Date().getFullYear()}). Vui lòng nhập lại.`);
+                }
+            } while (!validateNamXB(namXB));
+
+            // 4. Nhập và validate Số quyển
+            let numQuyen;
+            do {
+                soQuyen = prompt("Nhập số quyển (>= 0):");
+                if (soQuyen === null) return;
+                numQuyen = parseInt(soQuyen);
+                if (isNaN(numQuyen) || numQuyen < 0) {
+                    alert("Số quyển không hợp lệ. Vui lòng nhập một số nguyên lớn hơn hoặc bằng 0.");
+                }
+            } while (isNaN(numQuyen) || numQuyen < 0);
+
+            // 5. Tạo đối tượng sách và cập nhật danh sách
+            const newBook = new Book(maSo, ten.trim(), parseInt(namXB), numQuyen);
+            danhSachSach.push(newBook);
+
+            renderBookList();
+            alert(`Thêm sách "${newBook.ten}" thành công!`);
+        }
+
+        /**
+         * Xử lý mượn nhiều quyển, kiểm tra số lượng hiện có.
+         */
+        function handleBorrow(maSo) {
+            const book = findBookByMaSo(maSo);
+            if (!book) return; 
+
+            let quantity;
+            let input;
+            if(book.soQuyen === 0) {
+                alert("Đã hết sách");
+                return;
+            }
+            // Vòng lặp yêu cầu nhập số lượng hợp lệ
+            do {
+                input = prompt(`Bạn muốn mượn bao nhiêu quyển sách "${book.ten}"? `);
+                if (input === null) return; // Hủy bỏ
+                
+                quantity = parseInt(input);
+                
+                if (isNaN(quantity) || quantity <= 0) {
+                    alert("Số lượng mượn phải là số nguyên dương.");
+                
+                } else {
+                    break;
+                }
+            } while (true);
+
+            // Tiến hành mượn sách
+            for (let i = 0; i < quantity; i++) {
+                book.borrow();
+            }
+
+            alert(`Mượn thành công ${quantity} quyển sách: ${book.ten}.`);
+            renderBookList();
+        }
+        
+       
+        function handleReturn(maSo) {
+            const book = findBookByMaSo(maSo);  
+            if (!book) return;
+
+            let quantity;
+            let input;
+
+            do {
+                input = prompt(`Bạn muốn trả bao nhiêu quyển sách "${book.ten}"?`);
+                if (input === null) return;
+                
+                quantity = parseInt(input);
+                
+                if (isNaN(quantity) || quantity <= 0) {
+                    alert("Số lượng trả phải là số nguyên dương.");
+                } else if (book.soQuyen + quantity > book.maxQuyen) {
+                    // Kiểm tra giới hạn tối đa
+                    alert(`Thất bại!`);
+                } else {
+                    break;
+                }
+            } while (true);
+            
+            book.soQuyen += quantity;
+            book.tinhTrang = true;
+
+            alert(`Trả thành công ${quantity} quyển sách: ${book.ten}. Số lượng hiện tại: ${book.soQuyen}`);
+            renderBookList();
+        }
+
+        
+        document.getElementById("addBookBtn").addEventListener("click", addBook);
+
+        renderBookList();
+    </script>
+
+</body>
+</html>
